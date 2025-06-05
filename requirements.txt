@@ -1,0 +1,7 @@
+# requirements.txt
+python-telegram-bot==20.3
+python-dotenv==1.0.0
+requests==2.31.0
+apscheduler==3.10.1
+sqlalchemy==2.0.23
+datetime==5.5
