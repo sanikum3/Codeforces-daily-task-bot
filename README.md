@@ -1,1 +1,0 @@
-# Codeforces-daily-task-bot
