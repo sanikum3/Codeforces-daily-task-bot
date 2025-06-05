@@ -88,6 +88,34 @@ async def send_daily_problems(context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"Ошибка отправки в чат {chat_id}: {e}")
 
 
+async def send_problem_perm(update: Update, context: ContextTypes.DEFAULT_TYPE, ):
+    db = context.bot_data['db']
+    for chat_id, schedule_time in db.get_all_groups():
+        try:
+            group_settings = db.get_group(chat_id)
+            print(group_settings["min_rating"])
+            problem = get_random_problem(
+                min_rating=group_settings["min_rating"],
+                max_rating=group_settings["max_rating"]
+            )
+            
+            if problem:
+                message = (
+                    f"📅 <b>Задача дня!</b>\n\n"
+                    f"▪ <b>Название</b>: <a href='{problem['url']}'>{problem['name']}</a>\n"
+                    f"▪ <b>Сложность</b>: {problem['rating']}\n"
+                    f"▪ <b>Теги</b>: {', '.join(problem['tags'])}"
+                )
+                
+                await context.bot.send_message(
+                    chat_id=chat_id,
+                    text=message,
+                    parse_mode="HTML",
+                    disable_web_page_preview=True
+                )
+        except Exception as e:
+            logger.error(f"Ошибка отправки в чат {chat_id}: {e}")
+
 def main() -> None:
     # Создаем приложение и базу данных
     application = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -95,6 +123,7 @@ def main() -> None:
     application.bot_data['db'] = db
     
     # Регистрируем обработчики
+    application.add_handler(CommandHandler("gettask", send_problem_perm))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("settime", set_time))
     application.add_handler(ChatMemberHandler(track_chat_members))
